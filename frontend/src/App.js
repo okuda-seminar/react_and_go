@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import "./App.css";
 import Input from "./Input";
 
@@ -8,6 +8,11 @@ function HelloWorld(props) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [dob, setDob] = useState("");
+
+  // refs
+  const firstNameRef = useRef();
+  const lastNameRef = useRef(null);
+  const dobRef = useRef(null);
 
   const toggleTrue = () => {
     if (isTrue) {
@@ -32,8 +37,8 @@ function HelloWorld(props) {
         firstName: "Jack",
         lastName: "Smith",
         dob: "1999-02-04",
-      }
-    ]
+      },
+    ];
     setCrowd(people);
   }, []);
   // for the last parameter []:
@@ -47,33 +52,37 @@ function HelloWorld(props) {
     if (lastName !== "") {
       addPerson(firstName, lastName, dob);
     }
-  }
+  };
 
   const addPerson = (newFirst, newLast, newDOB) => {
-      // create the object
-      let newPerson = {
-        id: crowd.length + 1,
-        firstName: newFirst,
-        lastName: newLast,
-        dob: newDOB,
+    // create the object
+    let newPerson = {
+      id: crowd.length + 1,
+      firstName: newFirst,
+      lastName: newLast,
+      dob: newDOB,
+    };
+
+    const newList = crowd.concat(newPerson);
+
+    const sorted = newList.sort((a, b) => {
+      if (a.lastName < b.lastName) {
+        return -1;
+      } else if (a.lastName > b.lastName) {
+        return 1;
       }
+      return 0;
+    });
 
-      const newList = crowd.concat(newPerson);
+    setCrowd(sorted);
+    setFirstName("");
+    setLastName("");
+    setDob("");
 
-      const sorted = newList.sort((a, b) => {
-        if (a.lastName < b.lastName) {
-          return -1;
-        } else if (a.lastName > b.lastName) {
-          return 1;
-        }
-        return 0;
-      })
-
-      setCrowd(sorted);
-      setFirstName("");
-      setLastName("");
-      setDob("");
-  }
+    firstNameRef.current.value = "";
+    lastNameRef.current.value = "";
+    dobRef.current.value = "";
+  };
 
   return (
     <Fragment>
@@ -94,53 +103,61 @@ function HelloWorld(props) {
       </a>
       <hr />
 
-        <form autoComplete="off" onSubmit={handleSubmit}>
-
-          <div className="mb-3">
-            <label className="form-label" htmlFor="first-name">First Name</label>
-            <input
-              type="text"
-              name="first-name"
-              id="first-name"
-              autoComplete="first-name-new"
-              className="form-control"
-              onChange={(event) => setFirstName(event.target.value)}
-            ></input>
-          </div>
-
-          <Input
-            title="Last Name"
+      <form autoComplete="off" onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label className="form-label" htmlFor="first-name">
+            First Name
+          </label>
+          <input
             type="text"
-            name="last-name"
-            autoComplete="last-name-new"
+            name="first-name"
+            id="first-name"
+            ref={firstNameRef}
+            autoComplete="first-name-new"
             className="form-control"
-            onChange={(event) => setLastName(event.target.value)}
-          ></Input>
-
-          <Input
-            title="Date of Birth"
-            type="date"
-            name="dob"
-            autoComplete="dob-new"
-            className="form-control"
-            onChange={(event) => setDob(event.target.value)}
-          ></Input>
-
-          <input type="submit" value="Submit" className="btn btn-primary"></input>
-
-        </form>
-
-        <div>
-          First Name: {firstName}<br />
-          Last Name: {lastName}<br />
-          DOB: {dob}<br />
+            onChange={(event) => setFirstName(event.target.value)}
+          ></input>
         </div>
+
+        <Input
+          title="Last Name"
+          type="text"
+          ref={lastNameRef}
+          name="last-name"
+          autoComplete="last-name-new"
+          className="form-control"
+          onChange={(event) => setLastName(event.target.value)}
+        ></Input>
+
+        <Input
+          title="Date of Birth"
+          type="date"
+          ref={dobRef}
+          name="dob"
+          autoComplete="dob-new"
+          className="form-control"
+          onChange={(event) => setDob(event.target.value)}
+        ></Input>
+
+        <input type="submit" value="Submit" className="btn btn-primary"></input>
+      </form>
+
+      <div>
+        First Name: {firstName}
+        <br />
+        Last Name: {lastName}
+        <br />
+        DOB: {dob}
+        <br />
+      </div>
 
       <hr />
       <h3>People</h3>
       <ul className="list-group">
         {crowd.map((m) => (
-          <li key={m.id} className="list-group-item">{m.firstName} {m.lastName}</li>
+          <li key={m.id} className="list-group-item">
+            {m.firstName} {m.lastName}
+          </li>
         ))}
       </ul>
     </Fragment>
