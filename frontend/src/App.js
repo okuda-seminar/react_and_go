@@ -41,6 +41,40 @@ function HelloWorld(props) {
   // 2) when an empty array, runs only on first render
   // 3) you can pass props or state values
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (lastName !== "") {
+      addPerson(firstName, lastName, dob);
+    }
+  }
+
+  const addPerson = (newFirst, newLast, newDOB) => {
+      // create the object
+      let newPerson = {
+        id: crowd.length + 1,
+        firstName: newFirst,
+        lastName: newLast,
+        dob: newDOB,
+      }
+
+      const newList = crowd.concat(newPerson);
+
+      const sorted = newList.sort((a, b) => {
+        if (a.lastName < b.lastName) {
+          return -1;
+        } else if (a.lastName > b.lastName) {
+          return 1;
+        }
+        return 0;
+      })
+
+      setCrowd(sorted);
+      setFirstName("");
+      setLastName("");
+      setDob("");
+  }
+
   return (
     <Fragment>
       <hr />
@@ -60,7 +94,7 @@ function HelloWorld(props) {
       </a>
       <hr />
 
-        <form autoComplete="off">
+        <form autoComplete="off" onSubmit={handleSubmit}>
 
           <div className="mb-3">
             <label className="form-label" htmlFor="first-name">First Name</label>
@@ -91,6 +125,8 @@ function HelloWorld(props) {
             className="form-control"
             onChange={(event) => setDob(event.target.value)}
           ></Input>
+
+          <input type="submit" value="Submit" className="btn btn-primary"></input>
 
         </form>
 
