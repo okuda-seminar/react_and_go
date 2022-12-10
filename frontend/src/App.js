@@ -4,6 +4,9 @@ import "./App.css";
 function HelloWorld(props) {
   const [isTrue, setIsTrue] = useState(true);
   const [crowd, setCrowd] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dob, setDob] = useState("");
 
   const toggleTrue = () => {
     if (isTrue) {
@@ -15,6 +18,7 @@ function HelloWorld(props) {
 
   useEffect(() => {
     console.log("useEffect fired!");
+
     let people = [
       {
         id: 1,
@@ -31,6 +35,10 @@ function HelloWorld(props) {
     ]
     setCrowd(people);
   }, []);
+  // for the last parameter []:
+  // 1) when not there, useEffect runs on every render
+  // 2) when an empty array, runs only on first render
+  // 3) you can pass props or state values
 
   return (
     <Fragment>
@@ -49,6 +57,32 @@ function HelloWorld(props) {
       <a href="#!" className="btn btn-outline-secondary" onClick={toggleTrue}>
         Toggle isTrue
       </a>
+      <hr />
+
+        <form autoComplete="off">
+
+          <div className="mb-3">
+            <label className="form-label" htmlFor="first-name">First Name</label>
+            <input
+              type="text"
+              name="first-name"
+              id="first-name"
+              autoComplete="first-name-new"
+              className="form-control"
+              onChange={(event) => setFirstName(event.target.value)}
+            ></input>
+          </div>
+
+          
+
+        </form>
+
+        <div>
+          First Name: {firstName}<br />
+          Last Name: {lastName}<br />
+          DOB: {dob}<br />
+        </div>
+
       <hr />
       <h3>People</h3>
       <ul className="list-group">
