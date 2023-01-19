@@ -15,7 +15,7 @@ func (app *application) routes() http.Handler {
 	mux.Use(middleware.Recoverer)
 
 	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedOrigins: []string{"http://localhost:3000", "http://0.0.0.0:3000", "*"},
 	})
 	mux.Use(corsMiddleware.Handler)
 
