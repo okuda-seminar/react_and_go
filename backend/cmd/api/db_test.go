@@ -7,7 +7,7 @@ func TestconnectToDB(t *testing.T) {
 	app := &application{
 		DSN: "user=username password=password host=hostname port=5432 dbname=dbname sslmode=disable",
 	}
-	if _, err := connectToDB(dsn); err != nil {
+	if _, err := app.connectToDB(); err != nil {
 		t.Fatal(err)
 	}
 }
