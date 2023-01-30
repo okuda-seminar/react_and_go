@@ -1,16 +1,37 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import AppFooter from './AppFooter';
+import AppHeader from './AppHeader';
+// import AppFooter from './AppFooter';
+import AppContent from './AppContent';
+import AppFooterFunctionalComponent from './AppFooterFunctionalComponent';
+
+import './index.css';
 
 class App extends Component {
 
+  constructor(props) {
+    super(props);
+    this.handlePostChange = this.handlePostChange.bind(this);
+    this.state = {posts: []};
+  }
+
+  handlePostChange(posts) {
+    this.setState({posts: posts});
+  }
+
   render() {
+    const myProps = {
+      title: "My Cool App!",
+      subject: "My subject",
+      favourite_color: "red",
+    }
+
     return (
-      <div>
-        <div>
-          <h1>Hello, world!</h1>
-        </div>
-        <AppFooter />
+      <div className="app">
+        <AppHeader {...myProps} posts={this.state.posts} handlePostChange={this.handlePostChange} />
+        <AppContent handlePostChange={this.handlePostChange} />
+        {/* <AppFooter /> */}
+        <AppFooterFunctionalComponent myProperty={"Hello, world"}/>
       </div>
     );
   }

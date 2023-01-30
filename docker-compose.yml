@@ -24,7 +24,7 @@ services:
       - ./frontend/src:/frontend/src
       - ./frontend/package-lock.json:/frontend/package-lock.json
       - ./frontend/package.json:/frontend/package.json
-  
+      
   postgres:
     build: ./postgres
     environment:
