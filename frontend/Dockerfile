@@ -1,9 +1,7 @@
-FROM --platform=arm64 node:18
+FROM --platform=arm64 node:16.17.0
 
 COPY package-lock.json /frontend/package-lock.json
 COPY package.json /frontend/package.json
 
 WORKDIR /frontend
-RUN npm install -g npm@latest
-RUN npm install bootstrap
-RUN npm install
+RUN npm install 
