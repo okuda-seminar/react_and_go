@@ -1,45 +1,92 @@
 package main
 
 import (
-	"backend/internal/repository"
-	"backend/internal/repository/dbrepo"
+	"backend/models"
+	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
+
+	_ "github.com/lib/pq"
 )
 
-const port = 8080
+const version = "1.0.0"
+
+type config struct {
+	port int
+	env  string
+	db struct {
+		dsn string
+	}
+}
+
+type AppStatus struct {
+	Status      string `json:"status"`
+	Environment string `json:"environment"`
+	Version     string `json:"version"`
+}
 
 type application struct {
-	DSN    string
-	Domain string
-	DB     repository.DatabaseRepo
+	config config
+	logger *log.Logger
+	models models.Models
 }
 
 func main() {
-	// set application config
-	var app application
+	var cfg config
 
-	// read from command line
-	flag.StringVar(&app.DSN, "dsn", "host=postgres port=5432 user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
+	flag.IntVar(&cfg.port, "port", 4000, "Server port to listen on")
+	flag.StringVar(&cfg.env, "env", "development", "Application environment (development|production")
+	flag.StringVar(&cfg.db.dsn, "dsn", "host=postgres port=5432 user=postgres password=postgres dbname=movies sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
 	flag.Parse()
 
-	// connect to the database
-	conn, err := app.connectToDB()
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
-	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
-	defer app.DB.Connection().Close()
+	defer db.Close()
 
-	app.Domain = "example.com"
+	app := &application{
+		config: cfg,
+		logger: logger,
+		models: models.NewModels(db),
+	}
 
-	log.Println("Starting application on port", port)
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.port),
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
+	}
 
-	// // start a web server
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
+	logger.Println("Starting server on port", cfg.port)
+
+	err = srv.ListenAndServe()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
+}
+
+func openDB(cfg config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err = db.PingContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

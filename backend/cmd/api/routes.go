@@ -3,25 +3,16 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/rs/cors"
+	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() http.Handler {
-	// create a router mux
-	mux := chi.NewRouter()
 
-	mux.Use(middleware.Recoverer)
+func (app *application) routes() *httprouter.Router {
+	router := httprouter.New()
 
-	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000", "http://0.0.0.0:3000", "*"},
-	})
-	mux.Use(corsMiddleware.Handler)
+	router.HandlerFunc(http.MethodGet, "/status", app.statusHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/movie/:id", app.getOneMovie)
+	router.HandlerFunc(http.MethodGet, "/v1/movies", app.getAllMovies)
 
-	mux.Get("/", app.Home)
-
-	mux.Get("/movies", app.AllMovies)
-
-	return mux
+	return router
 }
